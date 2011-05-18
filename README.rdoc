@@ -11,6 +11,8 @@ Use it like this:
 
     require 'carrierwave/datamapper'
 
+Make sure to disable auto_validation on the mounted column.
+
 Using bundler:
 
     gem 'carrierwave-datamapper', :require => 'carrierwave/datamapper'
