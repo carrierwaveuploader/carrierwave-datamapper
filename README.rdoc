@@ -1,0 +1,18 @@
+= CarrierWave for Datamapper
+
+This gem adds support for DataMapper to CarrierWave, see the CarrierWave
+documentation for more detailed usage instructions.
+
+Install it like this:
+
+    gem install carrierwave-datamapper
+
+Use it like this:
+
+    require 'carrierwave/datamapper'
+
+Using bundler:
+
+    gem 'carrierwave-datamapper', :require => 'carrierwave/datamapper'
+
+This used to be part of CarrierWave but has been extracted.
