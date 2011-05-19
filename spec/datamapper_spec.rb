@@ -94,6 +94,14 @@ describe CarrierWave::DataMapper do
       @event.image.should be_blank
     end
 
+    context "with a saved resource" do
+      it "should mark the resource as dirty" do
+        @event.image = stub_file('test.jpeg')
+        @event.save
+        @event.image = stub_file('test.jpeg')
+        @event.dirty?.should be(true)
+      end
+    end
   end
 
   describe '#save' do
