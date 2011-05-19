@@ -28,6 +28,11 @@ module CarrierWave
           _mounter(:#{column}).remove = value
           attribute_set(:#{column}, '') if _mounter(:#{column}).remove?
         end
+
+        def #{column}=(value)
+          attribute_set(:#{column}, value)
+          super(value)
+        end
       RUBY
     end
 
