@@ -20,13 +20,6 @@ describe CarrierWave::DataMapper do
       storage_names[:default] = 'events'
 
       property :id, DataMapper::Property::Serial
-
-      # auto validation off currently for inferred type
-      # validation. issue is that validations are done on
-      # the value returned by model#property_name which is overloaded
-      # by carrierwave. pull request in @dm-more to remedy this.
-      property :image, String, :auto_validation => false
-
       mount_uploader :image, uploader
     end
 
