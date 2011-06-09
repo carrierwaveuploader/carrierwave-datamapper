@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+require 'carrierwave'
 require 'dm-core'
 require 'carrierwave/datamapper/property/uploader'
 
