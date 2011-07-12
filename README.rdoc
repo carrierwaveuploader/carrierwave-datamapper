@@ -3,18 +3,28 @@
 This gem adds support for DataMapper to CarrierWave, see the CarrierWave
 documentation for more detailed usage instructions.
 
-Install it like this:
+= Installation
 
     gem install carrierwave-datamapper
-
-Use it like this:
-
-    require 'carrierwave/datamapper'
-
-Make sure to disable auto_validation on the mounted column.
 
 Using bundler:
 
     gem 'carrierwave-datamapper', :require => 'carrierwave/datamapper'
+
+= Usage
+
+    require 'carrierwave/datamapper'
+
+    class ImageUploader < CarrierWave::Uploader::Base
+      include CarrierWave::MiniMagick
+    end
+
+    class Image < Attachment
+      include DataMapper::Resource
+
+      property :id, Serial
+
+      mount_uploader :source, ImageUploader
+    end
 
 This used to be part of CarrierWave but has been extracted.
