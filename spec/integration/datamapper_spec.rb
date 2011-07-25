@@ -3,161 +3,205 @@
 require 'spec_helper'
 
 describe CarrierWave::DataMapper do
+  let(:uploader)      { Class.new(CarrierWave::Uploader::Base) }
+  let(:uploader_name) { :image }
+  let(:file)          { stub_file('test.jpeg') }
 
-  before do
-    uploader = Class.new(CarrierWave::Uploader::Base)
 
-    @class = Class.new
-    @class.class_eval do
+  let(:described_class) do
+    klass = Class.new do
       include DataMapper::Resource
 
       storage_names[:default] = 'events'
 
       property :id, DataMapper::Property::Serial
-      mount_uploader :image, uploader
+
+      def self.name; :event; end
     end
 
-    @class.auto_migrate!
-
-    @uploader = uploader
-
-    @event = @class.new
+    klass.mount_uploader uploader_name, uploader
+    klass
   end
 
+  before do
+    DataMapper.finalize.auto_migrate!
+  end
+
+  let(:object) { described_class.new }
+
   describe '#image' do
+    subject { object.image }
 
-    it "should return blank uploader when nothing has been assigned" do
-      @event.image.should be_blank
+    context 'with a new resource' do
+      context 'when nothing has been assigned' do
+        let(:object) { described_class.new }
+
+        it { should be_blank }
+      end
+
+      context 'when file name is set' do
+        before do
+          object.attribute_set(:image, 'test.jpeg')
+          object.save
+          object.reload
+        end
+
+        its(:current_path) { should == public_path('uploads/test.jpeg') }
+      end
     end
 
-    it "should return blank uploader when an empty string has been assigned" do
-      repository(:default).adapter.execute("INSERT INTO events (image) VALUES ('')")
-      @event = @class.first
+    context 'with a persisted resource' do
+      let(:object) { described_class.first }
 
-      @event.image.should be_blank
+      context 'when an empty string has been assigned' do
+        before do
+          repository(:default).adapter.execute("INSERT INTO events (image) VALUES ('')")
+        end
+
+        it { should be_blank }
+      end
+
+      context 'when a value is stored in the database' do
+        before do
+          repository(:default).adapter.execute("INSERT INTO events (image) VALUES ('test.jpg')")
+        end
+
+        it { should be_an_instance_of(uploader) }
+      end
     end
-
-    it "should retrieve a file from the storage if a value is stored in the database" do
-      repository(:default).adapter.execute("INSERT INTO events (image) VALUES ('test.jpg')")
-      @event = @class.first
-
-      @event.save
-      @event.reload
-      @event.image.should be_an_instance_of(@uploader)
-    end
-
-    it "should set the path to the store dir" do
-      @event.attribute_set(:image, 'test.jpeg')
-      @event.save
-      @event.reload
-      @event.image.current_path.should == public_path('uploads/test.jpeg')
-    end
-
   end
 
   describe '#image=' do
+    context 'when a file is assigned' do
+      before do
+        object.image = file
+      end
 
-    it "should cache a file" do
-      @event.image = stub_file('test.jpeg')
-      @event.image.should be_an_instance_of(@uploader)
+      it "caches a file" do
+        object.image.should be_an_instance_of(uploader)
+      end
+
+      it "copies a file into into the cache directory" do
+        object.image.current_path.should =~ %r[^#{public_path('uploads/tmp')}]
+      end
+
+      context "with a saved resource" do
+        before do
+          object.save
+          object.image = stub_file('test.jpeg')
+        end
+
+        it "marks the resource as dirty" do
+          object.dirty?.should be(true)
+        end
+      end
+    end
+
+    context 'when nil is assigned' do
+      before do
+        object.image = nil
+      end
+
+      it "does nothing" do
+        object.image.should be_blank
+      end
+    end
+
+    context 'when nil is assigned' do
+      before do
+        object.image = 'nil'
+      end
+
+      it "does nothing" do
+        object.image.should be_blank
+      end
     end
 
     it "should write nothing to the database, to prevent overriden filenames to fail because of unassigned attributes" do
-      @event.attribute_get(:image).should be_nil
-    end
-
-    it "should copy a file into into the cache directory" do
-      @event.image = stub_file('test.jpeg')
-      @event.image.current_path.should =~ /^#{public_path('uploads/tmp')}/
-    end
-
-    it "should do nothing when nil is assigned" do
-      @event.image = nil
-      @event.image.should be_blank
-    end
-
-    it "should do nothing when an empty string is assigned" do
-      @event.image = ''
-      @event.image.should be_blank
-    end
-
-    context "with a saved resource" do
-      it "should mark the resource as dirty" do
-        @event.image = stub_file('test.jpeg')
-        @event.save
-        @event.image = stub_file('test.jpeg')
-        @event.dirty?.should be(true)
-      end
+      object.attribute_get(:image).should be_nil
     end
   end
 
   describe '#save' do
-
-    it "should do nothing when no file has been assigned" do
-      @event.save
-      @event.image.should be_blank
-    end
-
-    it "should copy the file to the upload directory when a file has been assigned" do
-      @event.image = stub_file('test.jpeg')
-      @event.save
-      @event.image.should be_an_instance_of(@uploader)
-      @event.image.current_path.should == public_path('uploads/test.jpeg')
-    end
-
-    it "should assign the filename to the database" do
-      @event.image = stub_file('test.jpeg')
-      @event.save
-      @event.reload
-      @event.attribute_get(:image).should == 'test.jpeg'
-    end
-
-    it "should remove the image if remove_image? returns true" do
-      @event.image = stub_file('test.jpeg')
-      @event.save
-      @event.remove_image = true
-      @event.save
-      @event.reload
-      @event.image.should be_blank
-      @event.attribute_get(:image).should == ''
-    end
-
-    describe "with validations" do
-      it "should do nothing when a validation fails" do
-        @class.validates_with_block(:textfile) { [false, "FAIL!"] }
-        @event.image = stub_file('test.jpeg')
-        @event.save
-        @event.image.should be_an_instance_of(@uploader)
-        @event.image.current_path.should =~ /^#{public_path('uploads/tmp')}/
+    context 'when no file has been assigned' do
+      before do
+        object.save
       end
 
-      it "should assign the filename before validation" do
-        @class.validates_with_block(:image) { [false, "FAIL!"] if self.image.nil? }
-        @event.image = stub_file('test.jpeg')
-        @event.save
-        @event.reload
-        @event.attribute_get(:image).should == 'test.jpeg'
+      it "does nothing" do
+        object.image.should be_blank
       end
     end
 
+    context 'when a file has been assigned' do
+      before do
+        object.image = file
+        object.save
+      end
+
+      context 'without validations' do
+        it "copies the file to the upload directory" do
+          object.image.should be_an_instance_of(uploader)
+          object.image.current_path.should == public_path('uploads/test.jpeg')
+        end
+
+        it "assigns the filename to the database" do
+          object.reload
+          object.attribute_get(:image).should == 'test.jpeg'
+        end
+
+        context 'when remove_image? returns true' do
+          before do
+            object.remove_image = true
+            object.save
+            object.reload
+          end
+
+          it "removes the image" do
+            object.image.should be_blank
+            object.attribute_get(:image).should == ''
+          end
+        end
+      end
+
+      context "with validations" do
+        before(:all) do
+          described_class.validates_with_block(:textfile) { [false, "FAIL!"] }
+        end
+
+        it "should do nothing when a validation fails" do
+          object.image.should be_an_instance_of(uploader)
+          object.image.current_path.should =~ %r[^#{public_path('uploads/tmp')}]
+        end
+
+        it "should assign the filename before validation" do
+          object.reload
+          object.attribute_get(:image).should == 'test.jpeg'
+        end
+      end
+    end
   end
 
   describe '#destroy' do
-
-    it "should do nothing when no file has been assigned" do
-      @event.destroy
+    context 'when no file has been assigned' do
+      it "does nothing when no file has been assigned" do
+        object.destroy
+      end
     end
 
-    it "should remove the file from the filesystem" do
-      @event.image = stub_file('test.jpeg')
-      @event.save.should be_true
-      File.exist?(public_path('uploads/test.jpeg')).should be_true
-      @event.image.should be_an_instance_of(@uploader)
-      @event.image.current_path.should == public_path('uploads/test.jpeg')
-      @event.destroy
-      File.exist?(public_path('uploads/test.jpeg')).should be_false
-    end
+    context 'when a file has been assigned' do
+      before do
+        object.image = file
+        object.save.should be_true
+        File.exist?(public_path('uploads/test.jpeg')).should be_true
+        object.image.should be_an_instance_of(uploader)
+        object.image.current_path.should == public_path('uploads/test.jpeg')
+        object.destroy
+      end
 
+      it "removes the file from the filesystem" do
+        File.exist?(public_path('uploads/test.jpeg')).should be_false
+      end
+    end
   end
-
 end
