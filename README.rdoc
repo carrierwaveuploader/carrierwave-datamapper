@@ -19,7 +19,7 @@ Using bundler:
       include CarrierWave::MiniMagick
     end
 
-    class Image < Attachment
+    class Image
       include DataMapper::Resource
 
       property :id, Serial
