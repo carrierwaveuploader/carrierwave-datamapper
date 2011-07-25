@@ -2,8 +2,10 @@ require 'rubygems'
 require 'bundler/setup'
 require 'rspec'
 
-require 'carrierwave'
 require 'carrierwave/datamapper'
+
+require 'dm-validations'
+require 'dm-migrations'
 
 DataMapper.setup(:default, 'sqlite3::memory:')
 

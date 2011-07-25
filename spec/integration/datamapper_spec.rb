@@ -2,10 +2,6 @@
 
 require 'spec_helper'
 
-require 'dm-core'
-require 'dm-validations'
-require 'dm-migrations'
-
 describe CarrierWave::DataMapper do
 
   before do
