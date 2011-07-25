@@ -18,7 +18,7 @@ module CarrierWave
         properties.delete(properties[column])
       end
 
-      property column, Property::Uploader
+      uploader_property = property(column, Property::Uploader)
 
       super
 
@@ -45,6 +45,8 @@ module CarrierWave
           super(value)
         end
       RUBY
+
+      uploader_property
     end
 
   end # DataMapper
