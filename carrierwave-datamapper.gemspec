@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name        = "carrierwave-datamapper"
   s.version     = Carrierwave::Datamapper::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Jonas Nicklas", "Trevor Turk"]
+  s.authors     = ["Jonas Nicklas", "Trevor Turk", "Piotr Solnica"]
   s.email       = ["jonas.nicklas@gmail.com"]
   s.homepage    = "https://github.com/jnicklas/carrierwave-datamapper"
   s.summary     = %q{Datamapper support for CarrierWave}
@@ -19,10 +19,10 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency "dm-core", ["~> 1.0"]
+  s.add_dependency "dm-core", ["~> 1.1.0"]
   s.add_dependency "carrierwave", ["~> 0.5.6"]
-  s.add_development_dependency "rspec", ["~> 2.0"]
-  s.add_development_dependency "dm-validations", ["~> 1.0"]
-  s.add_development_dependency "dm-migrations", ["~> 1.0"]
-  s.add_development_dependency "dm-sqlite-adapter", ["~> 1.0"]
+  s.add_development_dependency "rspec", ["~> 2.6.0"]
+  s.add_development_dependency "dm-validations", ["~> 1.1.0"]
+  s.add_development_dependency "dm-migrations", ["~> 1.1.0"]
+  s.add_development_dependency "dm-sqlite-adapter", ["~> 1.1.0"]
 end
