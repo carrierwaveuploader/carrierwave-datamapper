@@ -5,6 +5,8 @@ require 'rspec'
 require 'carrierwave'
 require 'carrierwave/datamapper'
 
+DataMapper.setup(:default, 'sqlite3::memory:')
+
 def file_path( *paths )
   File.expand_path(File.join(File.dirname(__FILE__), 'fixtures', *paths))
 end

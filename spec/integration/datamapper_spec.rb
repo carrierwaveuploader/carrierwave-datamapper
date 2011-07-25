@@ -6,8 +6,6 @@ require 'dm-core'
 require 'dm-validations'
 require 'dm-migrations'
 
-DataMapper.setup(:default, 'sqlite3::memory:')
-
 describe CarrierWave::DataMapper do
 
   before do
