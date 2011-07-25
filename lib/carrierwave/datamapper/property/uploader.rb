@@ -7,7 +7,7 @@ module CarrierWave
         end
 
         def initialize(model, name, options = {})
-          if ::DataMapper.const_defined?(:Validate)
+          if ::DataMapper.const_defined?(:Validations)
             options[:auto_validation] = false
           end
 

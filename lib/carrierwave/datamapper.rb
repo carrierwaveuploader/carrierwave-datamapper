@@ -25,7 +25,7 @@ module CarrierWave
       alias_method :read_uploader,  :attribute_get
       alias_method :write_uploader, :attribute_set
 
-      pre_hook = ::DataMapper.const_defined?(:Validate) ? :valid? : :save
+      pre_hook = ::DataMapper.const_defined?(:Validations) ? :valid? : :save
 
       before pre_hook, "write_#{column}_identifier".to_sym
       after  :save,    "store_#{column}!".to_sym
