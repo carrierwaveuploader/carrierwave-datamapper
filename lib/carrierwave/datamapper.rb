@@ -18,7 +18,11 @@ module CarrierWave
         properties.delete(properties[column])
       end
 
-      uploader_property = property(column, Property::Uploader)
+      uploader_property = if options[:mount_on]
+                            properties[options[:mount_on]]
+                          else
+                            property column, Property::Uploader
+                          end
 
       super
 
@@ -37,11 +41,11 @@ module CarrierWave
       class_eval <<-RUBY
         def remove_#{column}=(value)
           _mounter(:#{column}).remove = value
-          attribute_set(:#{column}, '') if _mounter(:#{column}).remove?
+          attribute_set(:#{uploader_property.name}, '') if _mounter(:#{column}).remove?
         end
 
         def #{column}=(value)
-          attribute_set(:#{column}, value)
+          attribute_set(:#{uploader_property.name}, value)
           super(value)
         end
       RUBY

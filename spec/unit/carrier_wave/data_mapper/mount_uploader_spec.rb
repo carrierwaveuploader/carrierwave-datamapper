@@ -46,4 +46,35 @@ describe CarrierWave::DataMapper, '.mount_uploader' do
       it { should respond_to("#{uploader_name}=") }
     end
   end
+
+  context "when using the :mount_on option" do
+    let(:uploader_column) { :image_file_name }
+
+    let(:described_class) do
+      Class.new do
+        include DataMapper::Resource
+
+        property :id, DataMapper::Property::Serial
+
+        property :image_file_name, String
+
+        def self.name; :spec_model; end
+      end
+    end
+
+    let!(:uploader_property) do
+      described_class.mount_uploader uploader_name, uploader,
+                                     :mount_on => :image_file_name
+    end
+
+    it "should not define a new uploader property" do
+      described_class.properties.should_not be_named(:image)
+    end
+
+    describe 'Uploader Property' do
+      subject { uploader_property }
+
+      its(:name)    { should == uploader_column }
+    end
+  end
 end
