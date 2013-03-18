@@ -1,5 +1,7 @@
 = CarrierWave for Datamapper
 
+{<img src="https://travis-ci.org/jnicklas/carrierwave-datamapper.png?branch=master" alt="Build Status" />}[https://travis-ci.org/jnicklas/carrierwave-datamapper]
+
 This gem adds support for DataMapper to CarrierWave, see the CarrierWave
 documentation for more detailed usage instructions.
 
