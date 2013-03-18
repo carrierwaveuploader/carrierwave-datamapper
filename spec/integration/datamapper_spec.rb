@@ -7,7 +7,6 @@ describe CarrierWave::DataMapper do
   let(:uploader_name) { :image }
   let(:file)          { stub_file('test.jpeg') }
 
-
   let(:described_class) do
     klass = Class.new do
       include DataMapper::Resource
